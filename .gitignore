@@ -1,0 +1,17 @@
+# Carpetas generadas por la compilacion -- se regeneran solas, no hace falta versionarlas
+/build/
+/dist/
+
+# Configuracion privada de NetBeans (rutas absolutas de TU PC, no sirven en otra)
+/nbproject/private/
+
+# Archivos de sistema operativo
+Thumbs.db
+.DS_Store
+
+# Archivos de respaldo que a veces deja el editor
+*~
+*.bak
+
+# Credenciales reales de la base de datos -- NUNCA se suben, cada quien crea el suyo
+/db.properties

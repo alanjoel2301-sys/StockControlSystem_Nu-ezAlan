@@ -35,7 +35,8 @@ public class FrmProducto extends javax.swing.JInternalFrame {
         tabla.setDefaultRenderer(Object.class, new BajoStockRenderer());
         tabla.getSelectionModel().addListSelectionListener(evt -> {
             if (!evt.getValueIsAdjusting() && tabla.getSelectedRow() != -1) {
-                int idProducto = (Integer) modeloTabla.getValueAt(tabla.getSelectedRow(), 0);
+                int filaModelo = tabla.convertRowIndexToModel(tabla.getSelectedRow());
+                int idProducto = (Integer) modeloTabla.getValueAt(filaModelo, 0);
                 controlador.seleccionarFila(idProducto);
             }
         });
@@ -241,14 +242,15 @@ public class FrmProducto extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnLimpiarActionPerformed
 
     private void btnVerHistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerHistorialActionPerformed
-        int fila = tabla.getSelectedRow();
-        if (fila == -1) {
+        int filaVista = tabla.getSelectedRow();
+        if (filaVista == -1) {
             javax.swing.JOptionPane.showMessageDialog(this, "Seleccione un producto de la tabla.",
                     "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
-        int idProducto = (Integer) modeloTabla.getValueAt(fila, 0);
-        String nombreProducto = (String) modeloTabla.getValueAt(fila, 1);
+        int filaModelo = tabla.convertRowIndexToModel(filaVista);
+        int idProducto = (Integer) modeloTabla.getValueAt(filaModelo, 0);
+        String nombreProducto = (String) modeloTabla.getValueAt(filaModelo, 1);
         controlador.verHistorial(idProducto, nombreProducto);
     }//GEN-LAST:event_btnVerHistorialActionPerformed
 

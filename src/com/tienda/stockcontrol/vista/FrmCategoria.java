@@ -28,7 +28,8 @@ public class FrmCategoria extends javax.swing.JInternalFrame {
         tabla.setModel(modeloTabla);
         tabla.getSelectionModel().addListSelectionListener(evt -> {
             if (!evt.getValueIsAdjusting() && tabla.getSelectedRow() != -1) {
-                int idCategoria = (Integer) modeloTabla.getValueAt(tabla.getSelectedRow(), 0);
+                int filaModelo = tabla.convertRowIndexToModel(tabla.getSelectedRow());
+                int idCategoria = (Integer) modeloTabla.getValueAt(filaModelo, 0);
                 controlador.seleccionarFila(idCategoria);
             }
         });

@@ -38,6 +38,14 @@ public class ControladorMovimientos {
             vista.mostrarAviso("No hay productos cargados. Cree un producto primero.");
             return;
         }
+        if (cantidad <= 0) {
+            vista.mostrarAviso("La cantidad debe ser mayor a cero.");
+            return;
+        }
+        if (!com.tienda.stockcontrol.controlador.SesionUsuario.getInstancia().haySesionActiva()) {
+            vista.mostrarAviso("No hay una sesion activa. Vuelva a iniciar sesion.");
+            return;
+        }
         String usuario = com.tienda.stockcontrol.controlador.SesionUsuario.getInstancia()
                 .getUsuarioActual().getNombreCompleto();
         com.tienda.stockcontrol.modelo.MovimientoStock movimiento = new com.tienda.stockcontrol.modelo.MovimientoStock(
@@ -45,8 +53,9 @@ public class ControladorMovimientos {
 
         try {
             movimientoDAO.registrarMovimiento(movimiento);
-            int signo = tipo == com.tienda.stockcontrol.modelo.TipoMovimiento.ENTRADA ? 1 : -1;
-            int nuevoStock = producto.getStockActual() + (signo * cantidad);
+            com.tienda.stockcontrol.modelo.Producto productoActualizado =
+                    productoDAO.buscarPorId(producto.getIdProducto());
+            int nuevoStock = productoActualizado != null ? productoActualizado.getStockActual() : -1;
             vista.mostrarMensaje("Movimiento registrado correctamente.\n"
                     + "Nuevo stock de " + producto.getNombre() + ": " + nuevoStock);
             vista.limpiarFormulario();

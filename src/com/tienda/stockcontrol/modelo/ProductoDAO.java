@@ -138,7 +138,19 @@ public class ProductoDAO {
         }
         return null;
     }
-    
+
+    protected boolean descontarStockSiAlcanza(Connection con, int idProducto, int cantidad) throws SQLException {
+        String sql = "UPDATE productos SET stock_actual = stock_actual - ? "
+                + "WHERE id_producto = ? AND stock_actual >= ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, idProducto);
+            ps.setInt(3, cantidad);
+            int filasAfectadas = ps.executeUpdate();
+            return filasAfectadas > 0;
+        }
+    }   
+ 
     protected void ajustarStock(Connection con, int idProducto, int cantidadConSigno) throws SQLException {
         String sql = "UPDATE productos SET stock_actual = stock_actual + ? WHERE id_producto = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {

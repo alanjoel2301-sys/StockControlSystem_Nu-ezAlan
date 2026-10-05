@@ -330,8 +330,8 @@ public class MainFrame extends javax.swing.JFrame {
                     new com.tienda.stockcontrol.modelo.ProductoDAO().listarBajoStock();
             if (!bajoStock.isEmpty()) {
                 javax.swing.JOptionPane panelAviso = new javax.swing.JOptionPane(
-                        "Hay " + bajoStock.size() + " producto(s) con stock por debajo del mínimo.\n"
-                                + "Podes revisarlos en Consultar stock (Ctrl+4).",
+                        "Hay " + bajoStock.size() + " producto(s) con stock en el minimo o por debajo.\n"
+                                + "Podes revisarlos en Consultas -> Consultar stock.",
                         javax.swing.JOptionPane.WARNING_MESSAGE);
                 javax.swing.JDialog dialogoAviso = panelAviso.createDialog(this, "Alerta de stock");
                 dialogoAviso.setModal(false);
@@ -345,6 +345,7 @@ public class MainFrame extends javax.swing.JFrame {
                 dialogoAviso.setVisible(true);
             }
         } catch (java.sql.SQLException e) {
+            logger.log(java.util.logging.Level.WARNING, "No se pudo verificar el stock bajo al iniciar", e);
         }
     }
     

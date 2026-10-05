@@ -27,7 +27,7 @@ public class ControladorEstadisticas {
                     graficoStock.crearGraficoStockPorCategoria(stockPorCategoria));
 
             java.util.Map<String, Integer> masVendidos = movimientoDAO.productosMasSalidas(10);
-            vista.agregarPestana("Productos mas vendidos",
+            vista.agregarPestana("Productos con mas salidas",
                     graficoStock.crearGraficoMasVendidos(masVendidos));
         } catch (java.sql.SQLException e) {
             vista.mostrarError(e);

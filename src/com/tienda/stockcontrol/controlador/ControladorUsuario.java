@@ -42,6 +42,9 @@ public class ControladorUsuario {
 
     public void agregar(String username, String passwordTexto, String nombreCompleto,
             com.tienda.stockcontrol.modelo.Rol rol) {
+        if (!tienePermiso()) {
+            return;
+        }
         if (username == null || username.trim().isEmpty()) {
             vista.mostrarAviso("El usuario es obligatorio.");
             return;
@@ -70,7 +73,7 @@ public class ControladorUsuario {
             limpiarEstado();
             cargarTabla();
         } catch (java.sql.SQLException e) {
-            if (e.getMessage() != null && e.getMessage().contains("Duplicate entry")) {
+            if (e.getErrorCode() == 1062) {
                 vista.mostrarAviso("Ese nombre de usuario ya existe.");
             } else {
                 vista.mostrarError(e);
@@ -79,6 +82,9 @@ public class ControladorUsuario {
     }
 
     public void modificar(String nombreCompleto, com.tienda.stockcontrol.modelo.Rol rol) {
+        if (!tienePermiso()) {
+            return;
+        }
         if (idSeleccionado == null) {
             vista.mostrarAviso("Seleccione un usuario de la tabla.");
             return;
@@ -117,6 +123,9 @@ public class ControladorUsuario {
     }
 
     public void cambiarEstado() {
+        if (!tienePermiso()) {
+            return;
+        }
         if (idSeleccionado == null) {
             vista.mostrarAviso("Seleccione un usuario de la tabla.");
             return;
@@ -142,6 +151,9 @@ public class ControladorUsuario {
     }
 
     public void restablecerContrasena(String nuevaPasswordTexto) {
+        if (!tienePermiso()) {
+            return;
+        }
         if (idSeleccionado == null) {
             vista.mostrarAviso("Seleccione un usuario de la tabla.");
             return;
@@ -164,6 +176,14 @@ public class ControladorUsuario {
         limpiarEstado();
     }
 
+    private boolean tienePermiso() {
+        boolean esAdmin = com.tienda.stockcontrol.controlador.SesionUsuario.getInstancia().esAdministrador();
+        if (!esAdmin) {
+            vista.mostrarAviso("No tiene permisos de administrador para realizar esta accion.");
+        }
+        return esAdmin;
+    }
+    
     private void limpiarEstado() {
         idSeleccionado = null;
         activoSeleccionado = true;

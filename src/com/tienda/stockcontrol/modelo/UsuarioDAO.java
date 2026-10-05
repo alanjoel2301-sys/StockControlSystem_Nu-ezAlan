@@ -82,13 +82,13 @@ public class UsuarioDAO {
     
     public List<Usuario> listarTodos() throws SQLException {
         List<Usuario> lista = new ArrayList<>();
-        String sql = "SELECT id_usuario, username, password_hash, salt, nombre_completo, rol, activo "
+        String sql = "SELECT id_usuario, username, nombre_completo, rol, activo "
                 + "FROM usuarios ORDER BY username";
         try (Connection con = ConexionBD.getConexion();
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                lista.add(mapear(rs));
+                lista.add(mapearSinCredenciales(rs));
             }
         }
         return lista;
@@ -130,6 +130,16 @@ public class UsuarioDAO {
         usuario.setUsername(rs.getString("username"));
         usuario.setPasswordHash(rs.getString("password_hash"));
         usuario.setSalt(rs.getString("salt"));
+        usuario.setNombreCompleto(rs.getString("nombre_completo"));
+        usuario.setRol(Rol.valueOf(rs.getString("rol")));
+        usuario.setActivo(rs.getBoolean("activo"));
+        return usuario;
+    }
+    
+    private Usuario mapearSinCredenciales(ResultSet rs) throws SQLException {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(rs.getInt("id_usuario"));
+        usuario.setUsername(rs.getString("username"));
         usuario.setNombreCompleto(rs.getString("nombre_completo"));
         usuario.setRol(Rol.valueOf(rs.getString("rol")));
         usuario.setActivo(rs.getBoolean("activo"));

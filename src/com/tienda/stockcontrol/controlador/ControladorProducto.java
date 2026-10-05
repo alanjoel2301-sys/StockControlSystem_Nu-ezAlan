@@ -64,8 +64,18 @@ public class ControladorProducto {
         if (producto == null) {
             return;
         }
+        producto.setStockActual(0);
         try {
             productoDAO.insertar(producto);
+            if (stockInicial > 0) {
+                String usuario = com.tienda.stockcontrol.controlador.SesionUsuario.getInstancia()
+                        .getUsuarioActual().getNombreCompleto();
+                com.tienda.stockcontrol.modelo.MovimientoStock movimientoInicial =
+                        new com.tienda.stockcontrol.modelo.MovimientoStock(
+                                producto, com.tienda.stockcontrol.modelo.TipoMovimiento.ENTRADA,
+                                stockInicial, "Alta de producto", usuario);
+                movimientoDAO.registrarMovimiento(movimientoInicial);
+            }
             vista.mostrarMensaje("Producto agregado correctamente.");
             limpiarEstado();
             cargarTabla();
@@ -75,6 +85,8 @@ public class ControladorProducto {
             } else {
                 vista.mostrarError(e);
             }
+        } catch (com.tienda.stockcontrol.modelo.StockException e) {
+            vista.mostrarError(e);
         }
     }
 
@@ -137,11 +149,11 @@ public class ControladorProducto {
     }
     
     private boolean esDuplicado(java.sql.SQLException e) {
-        return e.getMessage() != null && e.getMessage().contains("Duplicate entry");
+        return e.getErrorCode() == 1062;
     }
 
     private boolean esRestriccionForanea(java.sql.SQLException e) {
-        return e.getMessage() != null && e.getMessage().contains("foreign key constraint fails");
+        return e.getErrorCode() == 1451;
     }
 
     private com.tienda.stockcontrol.modelo.Producto validarYArmar(String nombre, String descripcion,
@@ -158,7 +170,7 @@ public class ControladorProducto {
         java.math.BigDecimal precio;
         try {
             precio = new java.math.BigDecimal(precioTexto.trim().replace(",", "."));
-            if (precio.compareTo(java.math.BigDecimal.ZERO) < 0) {
+            if (precio.compareTo(java.math.BigDecimal.ZERO) <= 0) {
                 throw new NumberFormatException();
             }
         } catch (NumberFormatException ex) {

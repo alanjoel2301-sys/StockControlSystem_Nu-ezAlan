@@ -26,6 +26,12 @@ public class MovimientoStockDAO {
     private final ProductoDAO productoDAO = new ProductoDAO();
     
     public void registrarMovimiento(MovimientoStock movimiento) throws SQLException, StockException {
+        if (movimiento == null || movimiento.getProducto() == null || movimiento.getTipo() == null) {
+            throw new StockException("Datos de movimiento incompletos.");
+        }
+        if (movimiento.getCantidad() <= 0) {
+            throw new StockException("La cantidad debe ser mayor a cero.");
+        }
         String sqlInsert = "INSERT INTO movimientos "
                 + "(id_producto, tipo, cantidad, fecha, motivo, usuario) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -33,20 +39,23 @@ public class MovimientoStockDAO {
         try {
             con = ConexionBD.getConexion();
             con.setAutoCommit(false);
+
+            int idProducto = movimiento.getProducto().getIdProducto();
+            int cantidad = movimiento.getCantidad();
+
             if (movimiento.getTipo() == TipoMovimiento.SALIDA) {
-                Producto actual = productoDAO.buscarPorId(movimiento.getProducto().getIdProducto());
-                if (actual == null) {
-                    throw new StockException("El producto seleccionado ya no existe.");
+                boolean descontado = productoDAO.descontarStockSiAlcanza(con, idProducto, cantidad);
+                if (!descontado) {
+                    throw new StockException("Stock insuficiente o el producto ya no existe.");
                 }
-                if (actual.getStockActual() < movimiento.getCantidad()) {
-                    throw new StockException("Stock insuficiente. Disponible: "
-                            + actual.getStockActual() + ", solicitado: " + movimiento.getCantidad());
-                }
+            } else {
+                productoDAO.ajustarStock(con, idProducto, cantidad);
             }
+
             try (PreparedStatement ps = con.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setInt(1, movimiento.getProducto().getIdProducto());
+                ps.setInt(1, idProducto);
                 ps.setString(2, movimiento.getTipo().name());
-                ps.setInt(3, movimiento.getCantidad());
+                ps.setInt(3, cantidad);
                 ps.setTimestamp(4, Timestamp.valueOf(movimiento.getFecha()));
                 ps.setString(5, movimiento.getMotivo());
                 ps.setString(6, movimiento.getUsuario());
@@ -57,9 +66,6 @@ public class MovimientoStockDAO {
                     }
                 }
             }
-            int signo = movimiento.getTipo() == TipoMovimiento.ENTRADA ? 1 : -1;
-            productoDAO.ajustarStock(con, movimiento.getProducto().getIdProducto(),
-                    signo * movimiento.getCantidad());
 
             con.commit();
         } catch (SQLException | StockException e) {

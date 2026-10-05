@@ -114,11 +114,11 @@ public class ControladorCategoria {
     }
     
     private boolean esDuplicado(java.sql.SQLException e) {
-        return e.getMessage() != null && e.getMessage().contains("Duplicate entry");
+        return e.getErrorCode() == 1062;
     }
 
     private boolean esRestriccionForanea(java.sql.SQLException e) {
-        return e.getMessage() != null && e.getMessage().contains("foreign key constraint fails");
+        return e.getErrorCode() == 1451;
     }
     
 }

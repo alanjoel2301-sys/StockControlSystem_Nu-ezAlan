@@ -31,6 +31,9 @@ public class ControladorStock {
         }
         try {
             java.util.List<com.tienda.stockcontrol.modelo.Producto> productos = productoDAO.buscarPorNombre(texto.trim());
+            if (soloBajoStock) {
+                productos.removeIf(p -> !p.isBajoStock());
+            }
             vista.mostrarProductos(productos);
         } catch (java.sql.SQLException e) {
             vista.mostrarError(e);

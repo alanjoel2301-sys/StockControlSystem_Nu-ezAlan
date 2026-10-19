@@ -272,14 +272,25 @@ public class FrmProducto extends javax.swing.JInternalFrame {
     }
 
     public void mostrarEnFormulario(com.tienda.stockcontrol.modelo.Producto p) {
-        txtNombre.setText(p.getNombre());
-        txtDescripcion.setText(p.getDescripcion());
-        comboCategoria.setSelectedItem(p.getCategoria());
-        txtPrecio.setText(p.getPrecio().toPlainString());
-        spinnerStockInicial.setValue(p.getStockActual());
-        spinnerStockInicial.setEnabled(false);
-        spinnerStockMinimo.setValue(p.getStockMinimo());
+    txtNombre.setText(p.getNombre());
+    txtDescripcion.setText(p.getDescripcion());
+
+    int idCategoriaProducto = p.getCategoria().getIdCategoria();
+
+    for (int i = 0; i < comboCategoria.getItemCount(); i++) {
+        com.tienda.stockcontrol.modelo.Categoria categoria = comboCategoria.getItemAt(i);
+
+        if (categoria.getIdCategoria() == idCategoriaProducto) {
+            comboCategoria.setSelectedIndex(i);
+            break;
+        }
     }
+
+    txtPrecio.setText(p.getPrecio().toPlainString());
+    spinnerStockInicial.setValue(p.getStockActual());
+    spinnerStockInicial.setEnabled(false);
+    spinnerStockMinimo.setValue(p.getStockMinimo());
+}
 
     public void limpiarFormulario() {
         txtNombre.setText("");

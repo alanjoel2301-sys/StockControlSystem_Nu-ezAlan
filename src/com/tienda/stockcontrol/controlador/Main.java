@@ -1,4 +1,4 @@
-package com.tienda.stockcontrol;
+package com.tienda.stockcontrol.controlador;
 
 /**
  *

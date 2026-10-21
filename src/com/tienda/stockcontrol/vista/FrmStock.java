@@ -10,6 +10,9 @@ public class FrmStock extends javax.swing.JInternalFrame {
     private final com.tienda.stockcontrol.controlador.ControladorStock controlador =
             new com.tienda.stockcontrol.controlador.ControladorStock(this);
     private javax.swing.table.DefaultTableModel modeloTabla;
+    private javax.swing.table.TableRowSorter<javax.swing.table.DefaultTableModel> sorter;
+    private static final int COL_NOMBRE = 1;
+    private static final int COL_CATEGORIA = 2;
     
     public FrmStock() {
         initComponents();
@@ -33,7 +36,33 @@ public class FrmStock extends javax.swing.JInternalFrame {
             }
         };
         tabla.setModel(modeloTabla);
+        sorter = new javax.swing.table.TableRowSorter<>(modeloTabla);
+        tabla.setRowSorter(sorter);
         tabla.setDefaultRenderer(Object.class, new EstadoRenderer());
+
+        txtBuscar.putClientProperty("JTextField.placeholderText", "Buscar por nombre...");
+        silenciarSonidoError(txtBuscar);
+        txtBuscar.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                aplicarFiltro();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                aplicarFiltro();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                aplicarFiltro();
+            }
+        });
+        cmbCriterio.addActionListener(e -> {
+            txtBuscar.putClientProperty("JTextField.placeholderText",
+                    "Buscar por " + cmbCriterio.getSelectedItem().toString().toLowerCase() + "...");
+            aplicarFiltro();
+        });
 
         controlador.actualizar(false);
         
@@ -44,11 +73,10 @@ public class FrmStock extends javax.swing.JInternalFrame {
     private void initComponents() {
 
         panelFiltros = new javax.swing.JPanel();
-        lblNombre = new javax.swing.JLabel();
         txtBuscar = new javax.swing.JTextField();
-        btnBuscar = new javax.swing.JButton();
         checkSoloBajoStock = new javax.swing.JCheckBox();
         btnActualizar = new javax.swing.JButton();
+        cmbCriterio = new javax.swing.JComboBox<>();
         scrollTabla = new javax.swing.JScrollPane();
         tabla = new javax.swing.JTable();
         lblTotales = new javax.swing.JLabel();
@@ -63,16 +91,14 @@ public class FrmStock extends javax.swing.JInternalFrame {
 
         panelFiltros.setBorder(javax.swing.BorderFactory.createTitledBorder("Filtros"));
 
-        lblNombre.setText("Nombre:");
-
-        btnBuscar.setText("Buscar");
-        btnBuscar.addActionListener(this::btnBuscarActionPerformed);
-
         checkSoloBajoStock.setText("Ver solo productos con bajo stock");
         checkSoloBajoStock.addActionListener(this::checkSoloBajoStockActionPerformed);
 
         btnActualizar.setText("Actualizar");
         btnActualizar.addActionListener(this::btnActualizarActionPerformed);
+
+        cmbCriterio.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Nombre", "Categoria" }));
+        cmbCriterio.addActionListener(this::cmbCriterioActionPerformed);
 
         javax.swing.GroupLayout panelFiltrosLayout = new javax.swing.GroupLayout(panelFiltros);
         panelFiltros.setLayout(panelFiltrosLayout);
@@ -80,14 +106,12 @@ public class FrmStock extends javax.swing.JInternalFrame {
             panelFiltrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelFiltrosLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lblNombre)
+                .addComponent(cmbCriterio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnBuscar)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(checkSoloBajoStock)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnActualizar)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -95,11 +119,10 @@ public class FrmStock extends javax.swing.JInternalFrame {
             panelFiltrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelFiltrosLayout.createSequentialGroup()
                 .addGroup(panelFiltrosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblNombre)
                     .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnBuscar)
                     .addComponent(checkSoloBajoStock)
-                    .addComponent(btnActualizar))
+                    .addComponent(btnActualizar)
+                    .addComponent(cmbCriterio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 13, Short.MAX_VALUE))
         );
 
@@ -142,10 +165,6 @@ public class FrmStock extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        controlador.buscar(txtBuscar.getText(), checkSoloBajoStock.isSelected());
-    }//GEN-LAST:event_btnBuscarActionPerformed
-
     private void checkSoloBajoStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkSoloBajoStockActionPerformed
         controlador.actualizar(checkSoloBajoStock.isSelected());
     }//GEN-LAST:event_checkSoloBajoStockActionPerformed
@@ -156,24 +175,20 @@ public class FrmStock extends javax.swing.JInternalFrame {
         controlador.actualizar(false);
     }//GEN-LAST:event_btnActualizarActionPerformed
 
+    private void cmbCriterioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbCriterioActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbCriterioActionPerformed
+
     public void mostrarProductos(java.util.List<com.tienda.stockcontrol.modelo.Producto> productos) {
         modeloTabla.setRowCount(0);
-        int totalUnidades = 0;
-        int cantidadBajoStock = 0;
         for (com.tienda.stockcontrol.modelo.Producto p : productos) {
             String estado = p.isBajoStock() ? "BAJO STOCK" : "OK";
             modeloTabla.addRow(new Object[]{
                 p.getIdProducto(), p.getNombre(), p.getCategoria().getNombre(),
                 p.getPrecio(), p.getStockActual(), p.getStockMinimo(), estado
             });
-            totalUnidades += p.getStockActual();
-            if (p.isBajoStock()) {
-                cantidadBajoStock++;
-            }
         }
-        lblTotales.setText(String.format(
-                "  Productos listados: %d | Unidades totales: %d | Con bajo stock: %d",
-                productos.size(), totalUnidades, cantidadBajoStock));
+        actualizarTotales();
     }
 
     public void mostrarError(Exception e) {
@@ -209,11 +224,77 @@ public class FrmStock extends javax.swing.JInternalFrame {
         }
     }
 
+    private static String normalizar(String texto) {
+        if (texto == null) {
+            return "";
+        }
+        return java.text.Normalizer.normalize(texto, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase();
+    }
+
+    private void aplicarFiltro() {
+        final String texto = normalizar(txtBuscar.getText().trim());
+        if (texto.isEmpty()) {
+            sorter.setRowFilter(null);
+        } else {
+            final int columna = cmbCriterio.getSelectedIndex() == 1 ? COL_CATEGORIA : COL_NOMBRE;
+            sorter.setRowFilter(new javax.swing.RowFilter<javax.swing.table.DefaultTableModel, Integer>() {
+                @Override
+                public boolean include(javax.swing.RowFilter.Entry<? extends javax.swing.table.DefaultTableModel, ? extends Integer> entry) {
+                    return normalizar(entry.getStringValue(columna)).contains(texto);
+                }
+            });
+        }
+        actualizarTotales();
+    }
+
+    private void actualizarTotales() {
+        int totalUnidades = 0;
+        int cantidadBajoStock = 0;
+        for (int i = 0; i < tabla.getRowCount(); i++) {
+            totalUnidades += (Integer) tabla.getValueAt(i, 4);
+            if ("BAJO STOCK".equals(tabla.getValueAt(i, 6))) {
+                cantidadBajoStock++;
+            }
+        }
+        lblTotales.setText(String.format(
+                "  Productos listados: %d | Unidades totales: %d | Con bajo stock: %d",
+                tabla.getRowCount(), totalUnidades, cantidadBajoStock));
+    }
+
+    private static void silenciarSonidoError(final javax.swing.text.JTextComponent campo) {
+        registrarSinSonido(campo, javax.swing.text.DefaultEditorKit.deletePrevCharAction, true);
+        registrarSinSonido(campo, javax.swing.text.DefaultEditorKit.deletePrevWordAction, true);
+        registrarSinSonido(campo, javax.swing.text.DefaultEditorKit.deleteNextCharAction, false);
+        registrarSinSonido(campo, javax.swing.text.DefaultEditorKit.deleteNextWordAction, false);
+    }
+
+    private static void registrarSinSonido(final javax.swing.text.JTextComponent campo,
+            String nombreAccion, final boolean haciaAtras) {
+        final javax.swing.Action original = campo.getActionMap().get(nombreAccion);
+        if (original == null) {
+            return;
+        }
+        campo.getActionMap().put(nombreAccion, new javax.swing.AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                boolean haySeleccion = campo.getSelectionStart() != campo.getSelectionEnd();
+                boolean hayQueBorrar = haySeleccion
+                        || (haciaAtras
+                                ? campo.getCaretPosition() > 0
+                                : campo.getCaretPosition() < campo.getDocument().getLength());
+                if (hayQueBorrar) {
+                    original.actionPerformed(e);
+                }
+            }
+        });
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActualizar;
-    private javax.swing.JButton btnBuscar;
     private javax.swing.JCheckBox checkSoloBajoStock;
-    private javax.swing.JLabel lblNombre;
+    private javax.swing.JComboBox<String> cmbCriterio;
     private javax.swing.JLabel lblTotales;
     private javax.swing.JPanel panelFiltros;
     private javax.swing.JScrollPane scrollTabla;

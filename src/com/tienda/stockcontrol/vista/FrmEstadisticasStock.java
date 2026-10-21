@@ -12,6 +12,7 @@ public class FrmEstadisticasStock extends javax.swing.JInternalFrame {
     
     public FrmEstadisticasStock() {
         initComponents();
+        tabs.putClientProperty("JTabbedPane.tabHeight", 38);
         controlador.cargarGraficos();
     }
 

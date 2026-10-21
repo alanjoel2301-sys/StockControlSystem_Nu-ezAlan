@@ -23,11 +23,11 @@ public class ControladorEstadisticas {
                     graficoStock.crearGraficoMovimientosPorMes(totales));
 
             java.util.Map<String, Integer> stockPorCategoria = movimientoDAO.stockPorCategoria();
-            vista.agregarPestana("Stock por categoria",
+            vista.agregarPestana("Stock por categoría",
                     graficoStock.crearGraficoStockPorCategoria(stockPorCategoria));
 
             java.util.Map<String, Integer> masVendidos = movimientoDAO.productosMasSalidas(10);
-            vista.agregarPestana("Productos con mas salidas",
+            vista.agregarPestana("Productos con más salidas",
                     graficoStock.crearGraficoMasVendidos(masVendidos));
         } catch (java.sql.SQLException e) {
             vista.mostrarError(e);

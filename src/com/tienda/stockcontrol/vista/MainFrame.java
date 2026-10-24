@@ -48,6 +48,7 @@ public class MainFrame extends javax.swing.JFrame {
         itemRegistrar = new javax.swing.JMenuItem();
         menuConsultas = new javax.swing.JMenu();
         itemStock = new javax.swing.JMenuItem();
+        itemExportarPdf = new javax.swing.JMenuItem();
         menuEstadisticas = new javax.swing.JMenu();
         itemGraficos = new javax.swing.JMenuItem();
         menuAyuda = new javax.swing.JMenu();
@@ -121,6 +122,11 @@ public class MainFrame extends javax.swing.JFrame {
         itemStock.setText("Consultar stock");
         itemStock.addActionListener(this::itemStockActionPerformed);
         menuConsultas.add(itemStock);
+
+        itemExportarPdf.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        itemExportarPdf.setText("Exportar a PDF");
+        itemExportarPdf.addActionListener(this::itemExportarPdfActionPerformed);
+        menuConsultas.add(itemExportarPdf);
 
         jMenuBar1.add(menuConsultas);
 
@@ -308,6 +314,10 @@ public class MainFrame extends javax.swing.JFrame {
         );
     }
     }//GEN-LAST:event_itemGuiaUsuarioActionPerformed
+
+    private void itemExportarPdfActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_itemExportarPdfActionPerformed
+        ExportadorPdf.exportarVentana(this, desktopPane.getSelectedFrame());
+    }//GEN-LAST:event_itemExportarPdfActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -633,6 +643,7 @@ private void verificarBajoStock() {
     private javax.swing.JMenuItem itemAlternarTema;
     private javax.swing.JMenuItem itemCategorias;
     private javax.swing.JMenuItem itemCerrarSesion;
+    private javax.swing.JMenuItem itemExportarPdf;
     private javax.swing.JMenuItem itemGraficos;
     private javax.swing.JMenuItem itemGuiaUsuario;
     private javax.swing.JMenuItem itemProductos;
